@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YoshiBon式：note販売コピー生成＆リライトAI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap');
+        body { font-family: 'Noto Sans JP', sans-serif; background-color: #f8fafc; }
+        .glass-effect { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); }
+        .tab-active { border-bottom: 4px solid #d97706; color: #d97706; font-weight: bold; }
+        .gradient-text { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .loading-spinner { border: 4px solid rgba(0, 0, 0, 0.1); width: 36px; height: 36px; border-radius: 50%; border-left-color: #d97706; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8 text-slate-800">
+    <div class="max-w-5xl mx-auto">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold mb-2">
+                <span class="gradient-text">YoshiBon式</span>：note販売コピー生成＆リライト
+            </h1>
+            <p class="text-gray-600 font-medium">「いいね」を「売上」に変える、最強の物語をAIが紡ぎます</p>
+        </header>
+
+        <!-- Tab Switching -->
+        <div class="flex justify-center mb-8 border-b border-gray-200">
+            <button id="tabNew" class="px-8 py-3 transition-all tab-active">
+                <i class="fas fa-magic mr-2"></i>新規noteコピー
+            </button>
+            <button id="tabRewrite" class="px-8 py-3 text-gray-500 hover:text-orange-600 transition-all">
+                <i class="fas fa-sync-alt mr-2"></i>売れる記事へリライト
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Left Side: Input Form -->
+            <section class="glass-effect p-6 rounded-3xl shadow-xl border border-orange-100">
+                <!-- Mode: New Copy -->
+                <div id="formNew" class="space-y-4">
+                    <h2 class="text-xl font-bold mb-4 flex items-center gap-2 text-gray-800 border-b pb-2">
+                        <i class="fas fa-plus-circle text-orange-500"></i>新規コピー作成
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">紹介するアプリ名</label>
+                            <input type="text" id="appName" placeholder="例：noteみっけ" class="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">販売URL (Stripe等)</label>
+                            <input type="url" id="urlNew" placeholder="https://buy.stripe.com/..." class="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-500 outline-none">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">ターゲットの深い悩み</label>
+                        <textarea id="targetNew" rows="2" placeholder="例：毎日3時間、白紙の画面と格闘して1文字も書けない初心者" class="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-500 outline-none"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">あなたの物語（失敗談・権威性）</label>
+                        <textarea id="storyNew" rows="4" placeholder="例：かつては文章力ゼロで時給400円。20年の現場支援を経て、ようやく掴んだ『成約の型』をこのツールに込めました…" class="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-500 outline-none"></textarea>
+                    </div>
+                </div>
+
+                <!-- Mode: Rewrite -->
+                <div id="formRewrite" class="hidden space-y-4">
+                    <h2 class="text-xl font-bold mb-4 flex items-center gap-2 text-gray-800 border-b pb-2">
+                        <i class="fas fa-edit text-orange-500"></i>売れる記事へリライト
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">紹介するアプリ名</label>
+                            <input type="text" id="appNameRewrite" placeholder="例：Note Rewrite" class="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">販売URL (Stripe等)</label>
+                            <input type="url" id="appUrlRewrite" placeholder="https://buy.stripe.com/..." class="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-500 outline-none">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">現在の記事の内容をペースト</label>
+                        <textarea id="noteContent" rows="6" placeholder="今公開している「反応が薄い」記事のテキストを貼り付けてください" class="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-500 outline-none"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">YoshiBon式：現場知見からのアドバイス</label>
+                        <textarea id="storyRewrite" rows="2" placeholder="例：20年の支援経験から、今の読者はもっと『即効性』を求めていると感じます…" class="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-500 outline-none"></textarea>
+                    </div>
+                </div>
+
+                <button id="generateBtn" class="w-full mt-6 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold py-4 rounded-xl shadow-lg hover:opacity-90 transition-all active:scale-95 text-lg">
+                    「YoshiBon式」でコピーを生成
+                </button>
+            </section>
+
+            <!-- Right Side: Output -->
+            <section class="flex flex-col">
+                <div id="outputArea" class="glass-effect p-6 rounded-3xl shadow-xl border border-gray-100 flex-grow relative min-h-[500px] overflow-auto">
+                    <div id="placeholder" class="absolute inset-0 flex flex-col items-center justify-center text-gray-400 p-10 text-center">
+                        <i class="fas fa-magic text-5xl mb-4 opacity-20"></i>
+                        <p class="font-medium text-lg">情報を入力して生成ボタンを押してください。<br>あなたの分身が「売れる文章」を紡ぎます。</p>
+                    </div>
+
+                    <div id="loading" class="hidden absolute inset-0 flex flex-col items-center justify-center bg-white bg-opacity-80 rounded-3xl z-10 text-center p-6">
+                        <div class="loading-spinner mb-4"></div>
+                        <p class="text-orange-600 font-bold text-lg">YoshiBon式の知見を融合中...</p>
+                        <p class="text-sm text-gray-500 mt-2">最強のセールスライティングを構築しています</p>
+                    </div>
+
+                    <div id="result" class="hidden space-y-4">
+                        <div class="flex justify-between items-center mb-4 border-b pb-4">
+                            <h3 id="resultTitle" class="text-lg font-bold text-gray-800">生成結果</h3>
+                            <button id="copyBtn" class="text-sm bg-orange-100 text-orange-700 hover:bg-orange-200 px-4 py-2 rounded-xl transition-colors font-bold">
+                                <i class="far fa-copy mr-1"></i> 全文コピー
+                            </button>
+                        </div>
+                        <div id="textContent" class="text-gray-700 leading-relaxed whitespace-pre-wrap text-sm md:text-base bg-white p-6 rounded-2xl border border-gray-50 shadow-inner"></div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Guidance -->
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <p class="font-bold text-orange-600 mb-2 flex items-center"><i class="fas fa-fire mr-2"></i>PASONAの黄金律</p>
+                <p class="text-xs text-gray-500 leading-relaxed">悩み(P)から共感(A)へ、解決(S)から行動(A)へ。科学的に実証された「売れる型」を自動適用します。</p>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <p class="font-bold text-orange-600 mb-2 flex items-center"><i class="fas fa-user-shield mr-2"></i>圧倒的権威性の物語</p>
+                <p class="text-xs text-gray-500 leading-relaxed">「中小企業支援20年」という比類なき実績を、読者の信頼へと変えるストーリーラインを構築します。</p>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <p class="font-bold text-orange-600 mb-2 flex items-center"><i class="fas fa-search-dollar mr-2"></i>成約率のボトルネック分析</p>
+                <p class="text-xs text-gray-500 leading-relaxed">リライトモードでは、なぜ今売れないのかを鋭く分析。売上を阻む壁をロジカルに破壊します。</p>
+            </div>
+        </div>
+        
+        <div id="statusToast" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-full text-sm shadow-2xl opacity-0 transition-opacity pointer-events-none duration-300"></div>
+    </div>
+
+    <script>
+        const apiKey = ""; // 実行環境から提供
+
+        let currentMode = 'new';
+        const tabNew = document.getElementById('tabNew');
+        const tabRewrite = document.getElementById('tabRewrite');
+        const formNew = document.getElementById('formNew');
+        const formRewrite = document.getElementById('formRewrite');
+
+        // Tab Switch Logic
+        tabNew.addEventListener('click', () => {
+            currentMode = 'new';
+            tabNew.className = "px-8 py-3 transition-all tab-active";
+            tabRewrite.className = "px-8 py-3 text-gray-500 hover:text-orange-600 transition-all";
+            formNew.classList.remove('hidden');
+            formRewrite.classList.add('hidden');
+        });
+
+        tabRewrite.addEventListener('click', () => {
+            currentMode = 'rewrite';
+            tabRewrite.className = "px-8 py-3 transition-all tab-active";
+            tabNew.className = "px-8 py-3 text-gray-500 hover:text-orange-600 transition-all";
+            formRewrite.classList.remove('hidden');
+            formNew.classList.add('hidden');
+        });
+
+        function showToast(message) {
+            const toast = document.getElementById('statusToast');
+            toast.textContent = message;
+            toast.style.opacity = "1";
+            setTimeout(() => { toast.style.opacity = "0"; }, 3000);
+        }
+
+        async function fetchGemini(prompt, retryCount = 0) {
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }],
+                        systemInstruction: {
+                            parts: [{ text: "あなたは『YoshiBon式』のプロセールスライターです。『考えるを、ひとりにしない』という想いを胸に、20年の現場支援経験から得た『成功の型』を武器に執筆します。単なるツール紹介ではなく、読者の痛みに深く寄り添い、マイナスからプラスへの物語とPASONAの法則を融合させ、noteで購入ボタンを押させる強力なセールスコピーを作成してください。トーンは威厳がありつつも、温かく読者の背中を支える伴走者のように。" }]
+                        }
+                    })
+                });
+
+                if (!response.ok) throw new Error('API Error');
+                const data = await response.json();
+                return data.candidates?.[0]?.content?.parts?.[0]?.text;
+            } catch (error) {
+                if (retryCount < 5) {
+                    const delay = Math.pow(2, retryCount) * 1000;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    return fetchGemini(prompt, retryCount + 1);
+                }
+                throw error;
+            }
+        }
+
+        document.getElementById('generateBtn').addEventListener('click', async () => {
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+            const textContent = document.getElementById('textContent');
+            const placeholder = document.getElementById('placeholder');
+            const resultTitle = document.getElementById('resultTitle');
+
+            let prompt = "";
+
+            if (currentMode === 'new') {
+                const appName = document.getElementById('appName').value;
+                const target = document.getElementById('targetNew').value;
+                const story = document.getElementById('storyNew').value;
+                const url = document.getElementById('urlNew').value;
+
+                if (!appName || !target || !story || !url) {
+                    showToast("すべての項目を入力してください。売れる魔法には材料が必要です。");
+                    return;
+                }
+
+                prompt = `以下の情報を元に、YoshiBon式を冠した新規note販売用の「最強の物語セールスコピー」を執筆してください。
+                ■アプリ名: ${appName}
+                ■販売・決済URL: ${url}
+                ■ターゲットの悩み: ${target}
+                ■YoshiBon式ストーリー（過去の失敗・支援経験）: ${story}
+                
+                【構成ルール】
+                1. 冒頭: 読者が今まさに直面している「地獄の光景」を鋭く問いかける（P）
+                2. 物語: 私自身の泥臭い経験と20年の知見を交え、「あなたの悩みは私の悩みである」と深く共感する（A）
+                3. 解決: アプリ「${appName}」がその絶望をどう希望に変えるのか、物語的に解決策を提示する。URL「${url}」へ誘導する（S）
+                4. 限定: 「本気で人生を変えたい人だけに届ける」という絞り込みと、今すぐ手に入れるべき緊急性を演出（N）
+                5. 結び: 未来のあなたを救うための明確な行動（A）
+                
+                最後に必ず「考えるを、ひとりにしない。YoshiBon式」というメッセージを含めてください。`;
+                resultTitle.textContent = "YoshiBon式：新規作成コピー";
+
+            } else {
+                const noteContent = document.getElementById('noteContent').value;
+                const storyRewrite = document.getElementById('storyRewrite').value;
+                const appName = document.getElementById('appNameRewrite').value;
+                const appUrl = document.getElementById('appUrlRewrite').value;
+
+                if (!noteContent || !storyRewrite || !appName || !appUrl) {
+                    showToast("すべての項目を入力してください。分析とリライトには情報が必要です！");
+                    return;
+                }
+
+                prompt = `以下の既存note販売記事を、YoshiBon式で新アプリ「${appName}」を成約させるための「売れるリライト版」へ昇華させてください。
+                ■現在の記事内容: ${noteContent}
+                ■新アプリ名: ${appName}
+                ■販売URL: ${appUrl}
+                ■YoshiBon式のアドバイス・知見: ${storyRewrite}
+                
+                【指示】
+                1. まず「20年の現場支援プロ」の視点で、なぜ元の記事が売れないのかを3つのボトルネックとして論理的に分析し提示してください。
+                2. その分析を踏まえ、PASONAの法則と物語の力を使い、「${appName}」への成約率を最大化させるリライト版を執筆してください。
+                3. 文章全体に、URL「${appUrl}」から購入することが「最善の解決策」であるという確信を植え付けてください。
+                
+                最後に「考えるを、ひとりにしない。YoshiBon式」という決意の言葉で締めてください。`;
+                resultTitle.textContent = "YoshiBon式：分析 ＆ リライト";
+            }
+
+            placeholder.classList.add('hidden');
+            loading.classList.remove('hidden');
+            result.classList.add('hidden');
+
+            try {
+                const response = await fetchGemini(prompt);
+                textContent.textContent = response;
+                loading.classList.add('hidden');
+                result.classList.remove('hidden');
+            } catch (error) {
+                loading.classList.add('hidden');
+                placeholder.classList.remove('hidden');
+                showToast("エラーが発生しました。時間を置いてお試しください。");
+            }
+        });
+
+        document.getElementById('copyBtn').addEventListener('click', () => {
+            const text = document.getElementById('textContent').textContent;
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            showToast("コピーしました！YoshiBon式の力をnoteで発揮しましょう。");
+        });
+    </script>
+</body>
+</html>
