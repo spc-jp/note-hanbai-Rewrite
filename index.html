@@ -4,6 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YoshiBon式：note販売コピー生成＆リライトAI</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://spc-jp.github.io/note-hanbai-Rewrite/favicon.png">
+    
+    <!-- OGP Metadata -->
+    <meta property="og:title" content="YoshiBon式：note販売コピー生成＆リライトAI">
+    <meta property="og:description" content="「考えるを、ひとりにしない」20年の現場知見を売れる物語へ変えるAIツール">
+    <meta property="og:image" content="https://spc-jp.github.io/note-hanbai-Rewrite/ogp.png">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://spc-jp.github.io/note-hanbai-Rewrite/ogp.png">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -24,6 +36,10 @@
     <div class="max-w-5xl mx-auto">
         <!-- Header -->
         <header class="text-center mb-8">
+            <!-- Brand Image -->
+            <div class="flex justify-center mb-4">
+                <img src="https://spc-jp.github.io/note-hanbai-Rewrite/ogp.png" alt="YoshiBon式" class="w-full max-w-md rounded-2xl shadow-lg border border-orange-100">
+            </div>
             <h1 class="text-3xl md:text-4xl font-bold mb-2">
                 <span class="gradient-text">YoshiBon式</span>：note販売コピー生成＆リライト
             </h1>
@@ -54,8 +70,8 @@
                 <div id="formNew" class="space-y-4">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-sm font-bold text-gray-700 mb-1">紹介するアプリ名</label>
-                            <input type="text" id="appNameNew" placeholder="例：noteみっけ" class="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-500 outline-none text-sm">
+                            <label class="block text-sm font-bold text-gray-700 mb-1">紹介するアプリ名とアプリURL</label>
+                            <input type="text" id="appNameNew" placeholder="例：noteみっけ https://..." class="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-500 outline-none text-sm">
                         </div>
                         <div>
                             <label class="block text-sm font-bold text-gray-700 mb-1">Stripe決済URL</label>
@@ -81,8 +97,8 @@
                 <div id="formRewrite" class="hidden space-y-4">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-sm font-bold text-gray-700 mb-1">紹介するアプリ名</label>
-                            <input type="text" id="appNameRewrite" placeholder="例：Note Rewrite" class="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-500 outline-none text-sm">
+                            <label class="block text-sm font-bold text-gray-700 mb-1">紹介するアプリ名とアプリURL</label>
+                            <input type="text" id="appNameRewrite" placeholder="例：Note Rewrite https://..." class="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-500 outline-none text-sm">
                         </div>
                         <div>
                             <label class="block text-sm font-bold text-gray-700 mb-1">Stripe決済URL</label>
@@ -214,8 +230,8 @@
             if (!appName) { showToast("まずアプリ名を入力してください！"); return; }
 
             showToast("AIがターゲットを考えています...");
-            const sys = "あなたは凄腕のマーケティングコンサルタントです。アプリ名から、そのアプリを喉から手が出るほど欲しがるターゲット像と深い悩みを1行で提案してください。例：『毎日3時間、白紙の画面と格闘して1文字も書けないnote初心者』";
-            const p = `アプリ名「${appName}」に最適なターゲットと悩みを1案出してください。`;
+            const sys = "あなたは凄腕のマーケティングコンサルタントです。アプリ名（およびURLが含まれる場合はその情報）から、そのアプリを喉から手が出るほど欲しがるターゲット像と深い悩みを1行で提案してください。例：『毎日3時間、白紙の画面と格闘して1文字も書けないnote初心者』";
+            const p = `アプリ情報「${appName}」に最適なターゲットと悩みを1案出してください。`;
 
             try {
                 const suggestion = await fetchGemini(p, sys);
@@ -231,47 +247,47 @@
             const placeholder = document.getElementById('placeholder');
             const resultTitle = document.getElementById('resultTitle');
 
-            const sys = "あなたは『YoshiBon式』のプロセールスライターです。20年の現場支援経験を背景に、『考えるを、ひとりにしない』という想いを込めて執筆します。PASONAの法則と物語の力を使い、noteで購入ボタンを押させる強力なコピーを作成してください。文章の最後には、内容に合致した横並びのハッシュタグを必ず7つ生成して追加してください（例：#タグ1 #タグ2 ...）。トーンは信頼感がありつつも温かい伴走者のように。";
+            const sys = "あなたは『YoshiBon式』のプロセールスライターです。20年の現場支援経験を背景に、『考えるを、ひとりにしない』という想いを込めて執筆します。PASONA의法則と物語の力を使い、noteで購入ボタンを押させる強力なコピーを作成してください。文章の最後には、内容に合致した横並びのハッシュタグを必ず7つ生成して追加してください（例：#タグ1 #タグ2 ...）。トーンは信頼感がありつつも温かい伴走者のように。";
 
             let p = "";
             if (currentMode === 'new') {
-                const name = document.getElementById('appNameNew').value.trim();
-                const url = document.getElementById('stripeUrlNew').value.trim();
+                const nameAndUrl = document.getElementById('appNameNew').value.trim();
+                const stripeUrl = document.getElementById('stripeUrlNew').value.trim();
                 const target = document.getElementById('targetNew').value.trim();
                 const story = document.getElementById('storyNew').value.trim();
-                if (!name || !url || !target || !story) { showToast("すべての項目を入力してください！"); return; }
+                if (!nameAndUrl || !stripeUrl || !target || !story) { showToast("すべての項目を入力してください！"); return; }
 
                 p = `YoshiBon式で新規note販売用コピーを執筆してください。
-                ■紹介するアプリ名: ${name}
-                ■Stripe決済URL: ${url}
+                ■紹介するアプリ名とURL: ${nameAndUrl}
+                ■Stripe決済URL: ${stripeUrl}
                 ■ターゲットの悩み: ${target}
                 ■私の物語(20年の経験): ${story}
                 
                 【必須構成】
                 1. ターゲットが今直面している痛みの描写(P)
                 2. 20年の現場知見に基づいた深い共感とあなたの物語(A)
-                3. アプリ「${name}」がいかに解決策になるかの提示。決済URL「${url}」への誘導(S)
+                3. アプリがいかに解決策になるかの提示。アプリ詳細URL（${nameAndUrl}）への言及と、決済URL（${stripeUrl}）への強力な誘導(S)
                 4. 「今」手に入れるべき理由と限定性(N)
                 5. 明確なアクション。最後に「考えるを、ひとりにしない。YoshiBon式」を必ず入れる(A)
                 6. 最後に、関連性の高いハッシュタグを横並びで7つ追加。`;
                 resultTitle.textContent = "YoshiBon式：新規作成コピー";
             } else {
-                const name = document.getElementById('appNameRewrite').value.trim();
-                const url = document.getElementById('stripeUrlRewrite').value.trim();
+                const nameAndUrl = document.getElementById('appNameRewrite').value.trim();
+                const stripeUrl = document.getElementById('stripeUrlRewrite').value.trim();
                 const content = document.getElementById('noteContent').value.trim();
                 const advice = document.getElementById('storyRewrite').value.trim();
-                if (!name || !url || !content || !advice) { showToast("情報をすべて入力してください。"); return; }
+                if (!nameAndUrl || !stripeUrl || !content || !advice) { showToast("情報をすべて入力してください。"); return; }
 
                 p = `既存のnote記事をYoshiBon式で「売れる記事」へリライトしてください。
-                ■紹介するアプリ名: ${name}
-                ■Stripe決済URL: ${url}
+                ■紹介するアプリ名とURL: ${nameAndUrl}
+                ■Stripe決済URL: ${stripeUrl}
                 ■元の記事内容: ${content}
                 ■プロのアドバイス: ${advice}
                 
                 【構成】
                 1. 20年の支援プロの視点で、なぜ元の記事が売れないのかを3点分析して提示。
-                2. 分析を踏まえ、PASONAの法則を適用したリライト版を執筆。
-                3. アプリ「${name}」への成約導線。URL「${url}」への誘導。
+                2. 分析を踏まえ、PASONAの法則を適用したリライト版を執筆。アプリURL（${nameAndUrl}）を適切に紹介。
+                3. ストライプ決済URL（${stripeUrl}）への成約導線。
                 4. 「考えるを、ひとりにしない。YoshiBon式」を含める。
                 5. 最後にハッシュタグ7つを横並びで追加。`;
                 resultTitle.textContent = "YoshiBon式：分析 ＆ リライト";
